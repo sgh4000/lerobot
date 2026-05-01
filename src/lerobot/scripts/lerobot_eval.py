@@ -576,6 +576,7 @@ def eval_main(cfg: EvalPipelineConfig):
             videos_dir=Path(cfg.output_dir) / "videos",
             start_seed=cfg.seed,
             max_parallel_tasks=cfg.env.max_parallel_tasks,
+            return_episode_data=True,
         )
         print("Overall Aggregated Metrics:")
         print(info["overall"])
@@ -622,7 +623,7 @@ def eval_one(
     """Evaluates one task_id of one suite using the provided vec env."""
 
     task_videos_dir = videos_dir
-
+          
     task_result = eval_policy(
         env=env,
         policy=policy,
@@ -636,6 +637,27 @@ def eval_one(
         return_episode_data=return_episode_data,
         start_seed=start_seed,
     )
+
+    if "episodes" in task_result and videos_dir is not None:
+        traj_dir = videos_dir.parent / "trajectories"
+        traj_dir.mkdir(parents=True, exist_ok=True)
+
+        episodes = task_result["episodes"]
+
+        keep_keys = [
+            "action",
+            "observation.state",
+            "episode_index",
+            "frame_index",
+            "timestamp",
+            "done",
+            "next.success",
+            "reward",
+            "index",
+        ]
+
+        slim = {k: v.detach().cpu() for k, v in episodes.items() if k in keep_keys}
+        torch.save(slim, traj_dir / f"{videos_dir.name}.pt")
 
     per_episode = task_result["per_episode"]
     return TaskMetrics(
