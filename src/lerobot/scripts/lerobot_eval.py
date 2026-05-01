@@ -165,14 +165,6 @@ def rollout(
     while not np.all(done) and step < max_steps:
         # Numpy array to tensor and changing dictionary keys to LeRobot policy format.
         observation = preprocess_observation(observation)
-        if return_observations:
-            all_observations.append(
-                      {
-                                "observation.state": torch.as_tensor(
-                                          observation["observation.state"]
-                                ).detatch().cpu()
-                      }
-            )
 
         # Infer "task" from sub-environments (prefer natural language description).
         # env.call() works with both SyncVectorEnv and AsyncVectorEnv.
@@ -186,6 +178,15 @@ def rollout(
 
         # Apply environment-specific preprocessing (e.g., LiberoProcessorStep for LIBERO)
         observation = env_preprocessor(observation)
+
+        if return_observations:
+            all_observations.append(
+                      {
+                                "observation.state": torch.as_tensor(
+                                          observation["observation.state"]
+                                ).detach().cpu()
+                      }
+            )
 
         observation = preprocessor(observation)
         with torch.inference_mode():
@@ -250,7 +251,7 @@ def rollout(
                       {
                                 "observation.state": torch.as_tensor(
                                           observation["observation.state"]
-                                ).detatch().cpu()
+                                ).detach().cpu()
                       }
             )
 
