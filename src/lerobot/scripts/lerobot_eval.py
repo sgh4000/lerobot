@@ -248,25 +248,25 @@ def rollout(
 
    # Track the final observation.
    if return_observations:
-    observation = preprocess_observation(observation)
+        observation = preprocess_observation(observation)
 
-    try:
-        observation["task"] = list(env.call("task_description"))
-    except (AttributeError, NotImplementedError):
         try:
-            observation["task"] = list(env.call("task"))
+            observation["task"] = list(env.call("task_description"))
         except (AttributeError, NotImplementedError):
-            observation["task"] = [""] * env.num_envs
+            try:
+                observation["task"] = list(env.call("task"))
+            except (AttributeError, NotImplementedError):
+                observation["task"] = [""] * env.num_envs
 
-    observation = env_preprocessor(observation)
+        observation = env_preprocessor(observation)
 
-    all_observations.append(
-        {
-            "observation.state": torch.as_tensor(
-                observation["observation.state"]
-            ).detach().cpu()
-        }
-    )
+        all_observations.append(
+            {
+                "observation.state": torch.as_tensor(
+                    observation["observation.state"]
+                ).detach().cpu()
+            }
+        )
 
     # Stack the sequence along the first dimension so that we have (batch, sequence, *) tensors.
     ret = {
@@ -665,7 +665,7 @@ def eval_one(
     )
 
     if "episodes" in task_result and videos_dir is not None:
-        traj_dir = videos_dir.parent / "trajectories"
+        traj_dir = videos_dir.parent.parent / "trajectories"
         traj_dir.mkdir(parents=True, exist_ok=True)
 
         episodes = task_result["episodes"]
