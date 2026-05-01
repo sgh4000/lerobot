@@ -179,6 +179,8 @@ def rollout(
         # Apply environment-specific preprocessing (e.g., LiberoProcessorStep for LIBERO)
         observation = env_preprocessor(observation)
 
+        observation = preprocessor(observation)
+
         if return_observations:
             all_observations.append(
                       {
@@ -188,7 +190,7 @@ def rollout(
                       }
             )
 
-        observation = preprocessor(observation)
+        
         with torch.inference_mode():
             action = policy.select_action(observation)
         action = postprocessor(action)
@@ -244,16 +246,27 @@ def rollout(
         progbar.set_postfix({"running_success_rate": f"{running_success_rate.item() * 100:.1f}%"})
         progbar.update()
 
-    # Track the final observation.
-    if return_observations:
-        observation = preprocess_observation(observation)
-        all_observations.append(
-                      {
-                                "observation.state": torch.as_tensor(
-                                          observation["observation.state"]
-                                ).detach().cpu()
-                      }
-            )
+   # Track the final observation.
+   if return_observations:
+    observation = preprocess_observation(observation)
+
+    try:
+        observation["task"] = list(env.call("task_description"))
+    except (AttributeError, NotImplementedError):
+        try:
+            observation["task"] = list(env.call("task"))
+        except (AttributeError, NotImplementedError):
+            observation["task"] = [""] * env.num_envs
+
+    observation = env_preprocessor(observation)
+
+    all_observations.append(
+        {
+            "observation.state": torch.as_tensor(
+                observation["observation.state"]
+            ).detach().cpu()
+        }
+    )
 
     # Stack the sequence along the first dimension so that we have (batch, sequence, *) tensors.
     ret = {
