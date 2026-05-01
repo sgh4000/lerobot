@@ -246,8 +246,8 @@ def rollout(
         progbar.set_postfix({"running_success_rate": f"{running_success_rate.item() * 100:.1f}%"})
         progbar.update()
 
-   # Track the final observation.
-   if return_observations:
+    # Track the final observation.
+    if return_observations:
         observation = preprocess_observation(observation)
 
         try:
