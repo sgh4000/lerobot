@@ -148,6 +148,15 @@ def rollout(
 
     print("\nROBOT STATE KEYS: ")
     print(observation["robot_state"].keys(), flush=True)
+
+    print("\nEEF KEYS: ")
+    print(observation["robot_state"]["eef"].keys(), flush=True)
+
+    print("\nGRIPPER KEYS: ")
+    print(observation["robot_state"]["gripper"].keys(), flush=True)
+
+    print("\nJOINTS KEYS: ")
+    print(observation["robot_state"]["joints"].keys(), flush=True)
           
     if render_callback is not None:
         render_callback(env)
