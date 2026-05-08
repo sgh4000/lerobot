@@ -145,6 +145,9 @@ def rollout(
 
     print("\nRAW OBS KEYS: ")
     print(observation.keys(), flush=True)
+
+    print("\nROBOT STATE KEYS: ")
+    print(observation["robot_state"].keys(), flush=True)
           
     if render_callback is not None:
         render_callback(env)
