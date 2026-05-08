@@ -179,6 +179,19 @@ def rollout(
     )
     check_env_attributes_and_types(env)
     while not np.all(done) and step < max_steps:
+
+        # Also store raw for trajectory analysis
+
+        raw_robot_state = observation["robot_state"]
+        eef_pos = raw_robot_state["eef"]["pos"]
+        eef_quat = raw_robot_state["eef"]["quat"]
+
+        gripper_qpos = raw_robot_state["gripper"]["qpos"]
+
+        joint_pos = raw_robot_state["joints"]["pos"]
+
+
+              
         # Numpy array to tensor and changing dictionary keys to LeRobot policy format.
         observation = preprocess_observation(observation)
 
@@ -209,7 +222,23 @@ def rollout(
                       {
                                 "observation.state": torch.as_tensor(
                                           observation["observation.state"]
-                                ).detach().cpu()
+                                ).detach().cpu(),
+
+                                "eef.pos": torch.as_tensor(
+                                          eef_pos
+                                ).detach().cpu(),
+
+                                "eef.quat": torch.as_tensor(
+                                          eef_quat
+                                ).detach().cpu(),
+
+                                "gripper.qpos": torch.as_tensor(
+                                          gripper_qpos
+                                ).detach().cpu(),
+
+                                "joints.pos": torch.as_tensor(
+                                          joint_pos
+                                ).detach().cpu(),
                       }
             )
 
@@ -271,6 +300,15 @@ def rollout(
 
     # Track the final observation.
     if return_observations:
+
+        raw_robot_state = observation["robot_state"]
+        eef_pos = raw_robot_state["eef"]["pos"]
+        eef_quat = raw_robot_state["eef"]["quat"]
+
+        gripper_qpos = raw_robot_state["gripper"]["qpos"]
+
+        joint_pos = raw_robot_state["joints"]["pos"]
+              
         observation = preprocess_observation(observation)
 
         try:
@@ -284,12 +322,28 @@ def rollout(
         observation = env_preprocessor(observation)
 
         all_observations.append(
-            {
-                "observation.state": torch.as_tensor(
-                    observation["observation.state"]
-                ).detach().cpu()
-            }
-        )
+                      {
+                                "observation.state": torch.as_tensor(
+                                          observation["observation.state"]
+                                ).detach().cpu(),
+
+                                "eef.pos": torch.as_tensor(
+                                          eef_pos
+                                ).detach().cpu(),
+
+                                "eef.quat": torch.as_tensor(
+                                          eef_quat
+                                ).detach().cpu(),
+
+                                "gripper.qpos": torch.as_tensor(
+                                          gripper_qpos
+                                ).detach().cpu(),
+
+                                "joints.pos": torch.as_tensor(
+                                          joint_pos
+                                ).detach().cpu(),
+                      }
+            )
 
     # Stack the sequence along the first dimension so that we have (batch, sequence, *) tensors.
     ret = {
@@ -696,6 +750,10 @@ def eval_one(
         keep_keys = [
             "action",
             "observation.state",
+            "eef.pos",
+            "eef.quat",
+            "gripper.qpos",
+            "joints.pos",
             "episode_index",
             "frame_index",
             "timestamp",
