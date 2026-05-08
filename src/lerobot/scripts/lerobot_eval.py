@@ -182,6 +182,10 @@ def rollout(
         observation = preprocessor(observation)
 
         if return_observations:
+            if step == 0:
+                print("\nOBSERVATION KEYS: ", flush=True)
+                print(observation.keys(), flush=True)
+            
             all_observations.append(
                       {
                                 "observation.state": torch.as_tensor(
