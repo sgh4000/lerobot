@@ -142,6 +142,10 @@ def rollout(
     # Reset the policy and environments.
     policy.reset()
     observation, info = env.reset(seed=seeds)
+
+    print("\nRAW OBS KEYS: ")
+    print(observation.keys(), flush=True)
+          
     if render_callback is not None:
         render_callback(env)
 
@@ -178,6 +182,9 @@ def rollout(
 
         # Apply environment-specific preprocessing (e.g., LiberoProcessorStep for LIBERO)
         observation = env_preprocessor(observation)
+        if step == 0:
+                print("\nRAW STEP OBSERVATION KEYS: ", flush=True)
+                print(observation.keys(), flush=True)
 
         observation = preprocessor(observation)
 
